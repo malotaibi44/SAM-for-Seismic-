@@ -113,7 +113,7 @@ if first=='n':
         os.makedirs(name)
         os.makedirs(os.path.join(name,"masks"))
         os.makedirs(os.path.join(name,"points"))
-    c=1
+    c=0
     tim=0
     t=time.time()
     
@@ -137,16 +137,16 @@ else:
  #### change that later 
 print(c)
 f=False
-
+## start looping through samples: 
 while c<150 and not f:
-    msk=[]
+    msk=[] # masks for each samples 
 
-    gp=[]
-    rp=[]
-    image = names[c]
-    ws['A'+str(c+2)]=str(c)
+    gp=[] #green points
+    rp=[] # red points 
+    image = names[c] # samples c
+    ws['A'+str(c+2)]=str(c) # samples name on excel 
     image=cv2.cvtColor((np.array(((image+1)/2)*255,dtype='uint8')), cv2.COLOR_GRAY2RGB)
-    label=labels[c]
+    label=labels[c] # GT for sample c 
 
     mask=0
     # image=np.array(((image+1)/2)*255,dtype='uint8') 
@@ -155,7 +155,7 @@ while c<150 and not f:
     co=0
     bs=0
     score=[]
-    msks=[]
+  
     stdx=[]
     stdy=[]
     ng=[]
@@ -183,12 +183,10 @@ while c<150 and not f:
             fig.canvas.stop_event_loop()
             fig.canvas.mpl_disconnect(cid)
         def onclick(event):
-            global gp
-            global np
+
             global label
             global mask
-            global green
-            global red
+
             if event.xdata is not None and event.ydata is not None:
 
 
@@ -201,9 +199,10 @@ while c<150 and not f:
 
                 if event.button is MouseButton.LEFT :
                     if current_color == 'green':
+                      
                         green.append((x,y))
                         greenx.append(x)
-                        print("ggg",gp)
+                        
                         
                         greeny.append(y)
                         ax[0].plot(x, y, 'go', markersize=5)
@@ -305,7 +304,18 @@ while c<150 and not f:
                     #ws[chr(68)+str(c+2)]=str(bs) # start at cell D(c)
                     show_points(input_point, input_label, ax[2])
                     plt.title(f"Score: {(intersection / union):.3f}", fontsize=10)
-            #msk.append(np.multiply(masks[0],4))
+                    ## saving masks, scores, points and other stats: 
+                    msk.append(np.multiply(mask,5))
+                    score.append(s)
+
+                    gp.append(np.multiply(green,1))
+
+                    rp.append(np.multiply(red,1))
+                    ng.append(len(greenx))
+                    nr.append(len(redx))
+                    stdx.append(statistics.pstdev(np.concatenate((greenx,redx))))
+                    stdy.append(statistics.pstdev(np.concatenate((greeny,redy))))
+                    print("scores:",score)
         # Create a function to toggle between green and red dots
         def toggle_color(event):
             global green
@@ -358,7 +368,7 @@ while c<150 and not f:
 
         # To select the truck, choose a point on it. Points are input to the model in (x,y) format and come with labels 1 (foreground point) or 0 (background point). Multiple points can be input; here we use only one. The chosen point will be shown as a star on the image.
         #print("Hereeeeeeeee")
-        score.append(s)
+        
         # ws['B'+str(c+2)]=str(len(green)) 
         # ws['C'+str(c+2)]=str(len(red))
         # ws['D'+str(c+2)]=str()
@@ -370,7 +380,7 @@ while c<150 and not f:
         #     point_labels=input_label,
         #     multimask_output=True,
         # )
-        msk.append(np.multiply(mask,5))
+        
         
         
         
@@ -381,34 +391,8 @@ while c<150 and not f:
         
         
         
-        # get_ipython().run_line_magic('matplotlib', 'inline')
-        #plt.figure(figsize=(10,10))
-        # plt.imshow(image)
-        # show_mask(mask, plt.gca())
-        # intersection = (mask & label).sum()
-        # union = (mask | label).sum()
-        # if intersection == 0:
-        #   score.append(0)
-        # else:
-        #   score.append(intersection / union)
-        #ws[chr(68)+str(c+2)]=str(bs) # start at cell D(c)
-        # show_points(input_point, input_label, plt.gca())
-        # plt.title(f"Mask {1}, Score: {score[co]:.3f}", fontsize=18)
-        # plt.axis('off')
-        # plt.show(block=False)  
-        # if score[co]>bs:
-        #     bs=score[co]
-        #ws['E'+str(c+2)]=str(input_point)
-        #ws['F'+str(c+2)]=str(input_label)
-        print("g",green)
-        print("gg",gp)
-        gp.append(green)
-        print("gg",gp)
-        rp.append(red)
-        ng.append(len(greenx))
-        nr.append(len(redx))
-        stdx.append(statistics.pstdev(np.concatenate((greenx,redx))))
-        stdy.append(statistics.pstdev(np.concatenate((greeny,redy))))
+
+
         #sleep(1)  
         # if np.max(score)<0.8:
         #     print("your score should be more than 0.8, try again")
@@ -422,8 +406,6 @@ while c<150 and not f:
         
     
     indx=np.argsort(-np.array(score))
-    print(indx)
-    print(gp)
     score=np.array(score)[indx]
     ng=np.array(ng)[indx]
     nr=np.array(nr)[indx]
@@ -443,8 +425,8 @@ while c<150 and not f:
             elif coun==5:
                 ws[col[0].coordinate]=score[i]
             coun+=1
-    np.save(os.path.join(name,"points",str(c)+"_green"),np.array(gp)[indx])
-    np.save(os.path.join(name,"points",str(c)+"_red"),np.array(rp)[indx])
+    np.save(os.path.join(name,"points",str(c)+"_green"),np.array(gp, dtype=object)[indx])
+    np.save(os.path.join(name,"points",str(c)+"_red"),np.array(rp, dtype=object)[indx])
     np.save(os.path.join(name,"masks",str(c)+"_mask"),np.array(msk)[indx])
     c+=1
     contin=input("do u want to continue? press y if you want to continue or anyting otherwise ")
