@@ -14,6 +14,7 @@ from IPython import get_ipython
 from matplotlib.backend_bases import MouseButton
 import time
 from PIL import Image 
+from segment_anything import sam_model_registry, SamPredictor
 #%%
 # names=os.listdir('C:/Users/Mohammed/Downloads/saltdome')
 # labels=os.listdir('C:/Users/Mohammed/Downloads/labels')
@@ -42,7 +43,7 @@ def closetn(node, nodes):
 
 
 sys.path.append("..")
-from segment_anything import sam_model_registry, SamPredictor
+
 
 sam_checkpoint = "sam_vit_h_4b8939.pth"
 model_type = "vit_h"
@@ -54,8 +55,8 @@ sam.to(device=device)
 
 predictor = SamPredictor(sam)
 
-names=np.load("C:/Users/Mohammed/OneDrive - Georgia Institute of Technology/sam/samples_.npy")
-labels=np.load("C:/Users/Mohammed/OneDrive - Georgia Institute of Technology/sam/lbls_.npy")
+names=np.load("samples_.npy")
+labels=np.load("lbls_.npy")
 
 
 
@@ -111,6 +112,7 @@ if first=='n':
     if not os.path.exists(name):
         os.makedirs(name)
         os.makedirs(os.path.join(name,"masks"))
+        os.makedirs(os.path.join(name,"points"))
     c=1
     tim=0
     t=time.time()
@@ -135,11 +137,12 @@ else:
  #### change that later 
 print(c)
 f=False
-msk=[]
-
 
 while c<150 and not f:
-    
+    msk=[]
+
+    gp=[]
+    rp=[]
     image = names[c]
     ws['A'+str(c+2)]=str(c)
     image=cv2.cvtColor((np.array(((image+1)/2)*255,dtype='uint8')), cv2.COLOR_GRAY2RGB)
@@ -180,10 +183,12 @@ while c<150 and not f:
             fig.canvas.stop_event_loop()
             fig.canvas.mpl_disconnect(cid)
         def onclick(event):
-            
+            global gp
+            global np
             global label
             global mask
-
+            global green
+            global red
             if event.xdata is not None and event.ydata is not None:
 
 
@@ -198,6 +203,7 @@ while c<150 and not f:
                     if current_color == 'green':
                         green.append((x,y))
                         greenx.append(x)
+                        print("ggg",gp)
                         
                         greeny.append(y)
                         ax[0].plot(x, y, 'go', markersize=5)
@@ -220,20 +226,21 @@ while c<150 and not f:
                     elif green:
                         print(current_color)
                         if current_color == 'green':
-                            print("g",len(green))
+                            #print("g",len(green))
                             
                             indx=closetn((x,y),green)
                             print(indx)
                             for line in ax[0].lines:
                                 if len(line.get_xdata())>0:
                                     if line.get_xdata()[0]==green[indx][0] and line.get_ydata()[0]==green[indx][1]:
-                                        print("Here1")
+                                        
+                                        #print("Here1")
                                         line.set_data([],[])
                                         break
                             for line in ax[1].lines:
                                 if len(line.get_xdata())>0:
                                     if line.get_xdata()[0]==green[indx][0] and line.get_ydata()[0]==green[indx][1]:
-                                        print("Here2")
+                                        #print("Here2")
                                         line.set_data([],[])
                                         break
                             del green[indx]
@@ -308,6 +315,7 @@ while c<150 and not f:
             global greeny
             global redy
             global current_color
+            
             if event.key == 'g':
                 current_color = 'green'
                 print("Switched to GREEN dot mode.")
@@ -349,7 +357,7 @@ while c<150 and not f:
         # After closing the image window, you can access the green and red pixel coordinate lists
 
         # To select the truck, choose a point on it. Points are input to the model in (x,y) format and come with labels 1 (foreground point) or 0 (background point). Multiple points can be input; here we use only one. The chosen point will be shown as a star on the image.
-        print("Hereeeeeeeee")
+        #print("Hereeeeeeeee")
         score.append(s)
         # ws['B'+str(c+2)]=str(len(green)) 
         # ws['C'+str(c+2)]=str(len(red))
@@ -392,24 +400,30 @@ while c<150 and not f:
         #     bs=score[co]
         #ws['E'+str(c+2)]=str(input_point)
         #ws['F'+str(c+2)]=str(input_label)
-
+        print("g",green)
+        print("gg",gp)
+        gp.append(green)
+        print("gg",gp)
+        rp.append(red)
         ng.append(len(greenx))
         nr.append(len(redx))
         stdx.append(statistics.pstdev(np.concatenate((greenx,redx))))
         stdy.append(statistics.pstdev(np.concatenate((greeny,redy))))
-        sleep(1)  
-        if np.max(score)<0.8:
-            print("your score should be more than 0.8, try again")
-            inc=""
-            co+=1
-            if co>=2:
-                inc=input("you tried more than 10 times\nYou can continue and save the best score ("+str(bs)+")\nif you want to continue press y")
-        else:
-            inc="y"
-            print(inc)
+        #sleep(1)  
+        # if np.max(score)<0.8:
+        #     print("your score should be more than 0.8, try again")
+        #     inc=""
+        #     co+=1
+        #     if co>=2:
+        #         inc=input("you tried more than 10 times\nYou can continue and save the best score ("+str(max(score))+")\nif you want to continue press y")
+        # else:
+        inc="y"
+        print(inc)
         
     
     indx=np.argsort(-np.array(score))
+    print(indx)
+    print(gp)
     score=np.array(score)[indx]
     ng=np.array(ng)[indx]
     nr=np.array(nr)[indx]
@@ -429,7 +443,9 @@ while c<150 and not f:
             elif coun==5:
                 ws[col[0].coordinate]=score[i]
             coun+=1
-    np.save(os.path.join(name,"masks",str(c)+"_mask"),msk)
+    np.save(os.path.join(name,"points",str(c)+"_green"),np.array(gp)[indx])
+    np.save(os.path.join(name,"points",str(c)+"_red"),np.array(rp)[indx])
+    np.save(os.path.join(name,"masks",str(c)+"_mask"),np.array(msk)[indx])
     c+=1
     contin=input("do u want to continue? press y if you want to continue or anyting otherwise ")
     if not contin =='y':
