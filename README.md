@@ -6,7 +6,7 @@ SAM-based segmentation tool for Seismic data. We are interested in segmenting th
 `!wget -q https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth <br>` <br><br>
 **or from this [direct-link](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)**
 and place it in your repository folder. <br>
-2. Download the samples from [here](https://gtvault-my.sharepoint.com/:u:/g/personal/malotaibi44_gatech_edu/EZXzpgizXyxKhB7thUknI1oBxKdc58WjIhYA0NipyhNKog?e=0hnU3L)
+2. Download the samples from [here](https://gtvault-my.sharepoint.com/:u:/g/personal/malotaibi44_gatech_edu/EZXzpgizXyxKhB7thUknI1oBxKdc58WjIhYA0NipyhNKog?e=0hnU3L) and place it in your repository
 
 3. run the code using non-notebook IDE (e.g. spyder,Pycharm, etc...)
 4. The code loads SAM weights and asks if you have previous work that you want to continue. If this is your first time, then type n.<br>
