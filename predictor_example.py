@@ -113,6 +113,8 @@ if first=='n':
         os.makedirs(name)
         os.makedirs(os.path.join(name,"masks"))
         os.makedirs(os.path.join(name,"points"))
+        os.makedirs(os.path.join(name,"sorts"))
+        
     c=0
     tim=0
     t=time.time()
@@ -428,6 +430,7 @@ while c<150 and not f:
     np.save(os.path.join(name,"points",str(c)+"_green"),np.array(gp, dtype=object)[indx])
     np.save(os.path.join(name,"points",str(c)+"_red"),np.array(rp, dtype=object)[indx])
     np.save(os.path.join(name,"masks",str(c)+"_mask"),np.array(msk)[indx])
+    np.save(os.path.join(name,"sorts",str(c)+"_sort"),indx)
     c+=1
     contin=input("do u want to continue? press y if you want to continue or anyting otherwise ")
     if not contin =='y':
