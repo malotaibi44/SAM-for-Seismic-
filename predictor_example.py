@@ -15,6 +15,7 @@ from matplotlib.backend_bases import MouseButton
 import time
 from PIL import Image 
 from segment_anything import sam_model_registry, SamPredictor
+import matplotlib
 #%%
 # names=os.listdir('C:/Users/Mohammed/Downloads/saltdome')
 # labels=os.listdir('C:/Users/Mohammed/Downloads/labels')
@@ -57,21 +58,6 @@ predictor = SamPredictor(sam)
 
 names=np.load("samples_.npy")
 labels=np.load("lbls_.npy")
-
-
-
-# #indx=random.sample(range(0, 50), 50)
-# #%%
-# index2=random.sample(range(50,len(names)),100)
-# names=np.array(names)
-# labels=np.array(labels)
-#names=names[indx]
-#labels=labels[indx]
-# ii=np.concatenate((index2,indx))
-
-# ii=np.load('C:/Users/Mohammed/Downloads/ii.npy')
-# names=names[ii]
-# labels=labels[ii]
 
 #%%
 
@@ -122,7 +108,8 @@ if first=='n':
 else:
     from openpyxl import load_workbook
     name=input("what is your name?\n")
-    load_workbook(os.path.join(name,name+".xlsx"))
+    wb=load_workbook(os.path.join(name,name+".xlsx"))
+    ws=wb.active
     c=len(os.listdir(os.path.join(name,"masks")))
     f=open(os.path.join(name,"time.txt"),'r')
     
@@ -165,15 +152,18 @@ while c<150 and not f:
     green=[]
     red=[]
     greenx = []
+
     redx = []
     greeny = []
     redy = []
     # label=plt.imread('C:/Users/Mohammed/Downloads/labels/'+labels[c])
     label=label==5
+    matplotlib.use('Qt5Agg')
+
     while inc!="y":
         s=0
         current_color = 'green'
-        get_ipython().run_line_magic('matplotlib', 'qt')
+        #get_ipython().run_line_magic('matplotlib', 'qt')
         fig, ax = plt.subplots(1,3,figsize=(15,7))
         if green and red :
             ax[0].plot(greenx, greeny, 'go', markersize=5)
