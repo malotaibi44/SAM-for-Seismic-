@@ -75,9 +75,9 @@ labels=np.load("lbls_.npy")
 
 #%%
 
-first=input("Do you want to load previous work? -y -n")
+first=input("Do you want to load previous work? -y -n\n")
 while first!='n' and first!='y':
-    first=input("Chose y or n, Do you want to load previous work? -y -n")
+    first=input("Chose y or n, Do you want to load previous work? -y -n\n")
 if first=='n':
     wb = Workbook()
     ws = wb.active
@@ -107,7 +107,7 @@ if first=='n':
             elif coun==5:
                 ws[col[0].coordinate]='score of '+str(i+2)
             coun+=1
-    name = input("Type your name: ")
+    name = input("Type your name:\n")
 
     if not os.path.exists(name):
         os.makedirs(name)
@@ -121,9 +121,9 @@ if first=='n':
     
 else:
     from openpyxl import load_workbook
-    name=input("what is your name?")
+    name=input("what is your name?\n")
     load_workbook(os.path.join(name,name+".xlsx"))
-    c=len(os.listdir(os.path.join(name,"masks")))+1
+    c=len(os.listdir(os.path.join(name,"masks")))
     f=open(os.path.join(name,"time.txt"),'r')
     
     tim=f.readline()
