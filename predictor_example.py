@@ -161,7 +161,9 @@ while c<150 and not f:
     matplotlib.use('Qt5Agg')
 
     while inc!="y":
-        s=0
+        s=0 # this is for the score 
+        count=1 # to count the score max 
+        
         current_color = 'green'
         #get_ipython().run_line_magic('matplotlib', 'qt')
         fig, ax = plt.subplots(1,3,figsize=(15,7))
@@ -272,6 +274,8 @@ while c<150 and not f:
                     global s
                     print("green:",green)
                     print("red:",red)
+                    global count
+                    global cs
                     input_point=np.concatenate((green,red))
                     input_label=np.concatenate(([1]*len(green),[0]*len(red)))
                    
@@ -295,11 +299,28 @@ while c<150 and not f:
                       s=intersection / union
                     #ws[chr(68)+str(c+2)]=str(bs) # start at cell D(c)
                     show_points(input_point, input_label, ax[2])
-                    plt.title(f"Score: {(intersection / union):.3f}", fontsize=10)
+                    msg=""
+                    cs+=1
+                    if len(score)==0:
+                        maxx=0
+                    else:
+                        maxx=max(score)
+                    
+                    if maxx>=s:
+                        print("\nheere\n")
+                        if count>=5:
+                            msg="\nNo better score is achieved in the last 5 attempts and you may stop.\nThe best score ("+str(round(max(score),2))+") is saved"
+                        else:
+                            print("less")
+                            count+=1
+                    elif  maxx<s:
+                        print("more")
+                        count=1
+                    plt.title(f"Score: {(intersection / union):.3f}"+msg, fontsize=13)
                     ## saving masks, scores, points and other stats: 
                     msk.append(np.multiply(mask,5))
+                    
                     score.append(s)
-
                     gp.append(np.multiply(green,1))
 
                     rp.append(np.multiply(red,1))
