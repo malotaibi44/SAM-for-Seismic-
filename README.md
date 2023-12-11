@@ -24,3 +24,7 @@ If this is not your first time, then type the same name you typed in your first 
 9.  After closing the window you will be asked if you still want to continue or not. if not you can press n and the code will be terminated. Otherwise, you can press y to proceed to the next sample.<br><br>
 **Imprtant Note If you want to close the task and resume later, finish the current sample, and once the question appears you may type 'n', closing the window without trying to achieve the 0.9 score will save your bad score and you will resume with the next one.**
 10.  Once you finish all the 150 samples ( we expect to take 3 hours maximum), send us the folder that has your name.
+
+
+**Update 1:**
+Now you will get notified if you tried prompting for several times and your score did not improve. 
