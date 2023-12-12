@@ -158,7 +158,7 @@ while c<150 and not f:
     redy = []
     # label=plt.imread('C:/Users/Mohammed/Downloads/labels/'+labels[c])
     label=label==5
-    matplotlib.use('Qt5Agg')
+    matplotlib.use('TkAgg')
 
     while inc!="y":
         s=0 # this is for the score 
@@ -275,7 +275,7 @@ while c<150 and not f:
                     print("green:",green)
                     print("red:",red)
                     global count
-                    global cs
+                  
                     input_point=np.concatenate((green,red))
                     input_label=np.concatenate(([1]*len(green),[0]*len(red)))
                    
@@ -300,7 +300,7 @@ while c<150 and not f:
                     #ws[chr(68)+str(c+2)]=str(bs) # start at cell D(c)
                     show_points(input_point, input_label, ax[2])
                     msg=""
-                    cs+=1
+               
                     if len(score)==0:
                         maxx=0
                     else:
