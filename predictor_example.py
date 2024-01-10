@@ -1,4 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 10 01:47:37 2024
 
+@author: Mohammed
+"""
+
+import pyautogui
 import sys
 from time import sleep
 using_colab = False
@@ -29,6 +36,7 @@ def show_mask(mask, ax, random_color=False):
     ax.imshow(mask_image)
     
 def show_points(coords, labels, ax, marker_size=50):
+    
     pos_points = coords[labels==1]
     neg_points = coords[labels==0]
     ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
@@ -46,7 +54,7 @@ def closetn(node, nodes):
 sys.path.append("..")
 
 
-sam_checkpoint = "sam_vit_h_4b8939.pth"
+sam_checkpoint = 'E:/SAM-for-Seismic--main/SAM-for-Seismic--main/sam_vit_h_4b8939.pth'
 model_type = "vit_h"
 
 device = "cuda"
@@ -136,7 +144,7 @@ while c<150 and not f:
     ws['A'+str(c+2)]=str(c) # samples name on excel 
     image=cv2.cvtColor((np.array(((image+1)/2)*255,dtype='uint8')), cv2.COLOR_GRAY2RGB)
     label=labels[c] # GT for sample c 
-
+    rmv=False
     mask=0
     # image=np.array(((image+1)/2)*255,dtype='uint8') 
     predictor.set_image(image)
@@ -163,7 +171,7 @@ while c<150 and not f:
     while inc!="y":
         s=0 # this is for the score 
         count=1 # to count the score max 
-        
+        lessfive=0
         current_color = 'green'
         #get_ipython().run_line_magic('matplotlib', 'qt')
         fig, ax = plt.subplots(1,3,figsize=(15,7))
@@ -177,10 +185,16 @@ while c<150 and not f:
             fig.canvas.stop_event_loop()
             fig.canvas.mpl_disconnect(cid)
         def onclick(event):
-
+            global count
+            global green
+            global red
+            global greenx
+            global redx
+            global greeny
+            global redy
             global label
             global mask
-
+            global lessfive
             if event.xdata is not None and event.ydata is not None:
 
 
@@ -211,9 +225,9 @@ while c<150 and not f:
                         ax[0].plot(x, y, 'ro', markersize=5)
                         ax[1].plot(x, y, 'ro', markersize=5)
                         plt.draw()
-
-                elif event.button is MouseButton.RIGHT:
                     
+                elif event.button is MouseButton.RIGHT:
+
                     if not green and not red: 
                         print("no points to delete")
                     elif green:
@@ -245,37 +259,37 @@ while c<150 and not f:
                             #ax[1].plot(x, y, 'go', markersize=5)
 
                             plt.draw()
-                        elif red:
-                            print(current_color)
-                            indx=closetn((x,y),red)
-                            
-                            for line in ax[0].lines:
-                                if len(line.get_xdata())>0:
-                                    print()
-                                    if line.get_xdata()[0]==red[indx][0] and line.get_ydata()[0]==red[indx][1]:
-                                        line.set_data([],[])
-                                        break
-                            for line in ax[1].lines:
-                                if len(line.get_xdata())>0:
-                                    if line.get_xdata()[0]==red[indx][0] and line.get_ydata()[0]==red[indx][1]:
-                                        line.set_data([],[])
-                                        break
-                            #ax[0].plot(x, y, 'ro', markersize=5)
-                            #ax[1].plot(x, y, 'ro', markersize=5)                            
-                            #ax[0].set_offsets(red)
-                            #a.set_offsets(red)
-                            del red[indx]
-                            del redx[indx]
-                            
-                            del redy[indx]
-                            plt.draw()
+                    elif red:
+                        print(current_color)
+                        indx=closetn((x,y),red)
+                        
+                        for line in ax[0].lines:
+                            if len(line.get_xdata())>0:
+                                print()
+                                if line.get_xdata()[0]==red[indx][0] and line.get_ydata()[0]==red[indx][1]:
+                                    line.set_data([],[])
+                                    break
+                        for line in ax[1].lines:
+                            if len(line.get_xdata())>0:
+                                if line.get_xdata()[0]==red[indx][0] and line.get_ydata()[0]==red[indx][1]:
+                                    line.set_data([],[])
+                                    break
+                        #ax[0].plot(x, y, 'ro', markersize=5)
+                        #ax[1].plot(x, y, 'ro', markersize=5)                            
+                        #ax[0].set_offsets(red)
+                        #a.set_offsets(red)
+                        del red[indx]
+                        del redx[indx]
+                        
+                        del redy[indx]
+                        plt.draw()
 
                 if green and red:
                     global s
                     print("green:",green)
                     print("red:",red)
-                    global count
-                  
+                    
+                    
                     input_point=np.concatenate((green,red))
                     input_label=np.concatenate(([1]*len(green),[0]*len(red)))
                    
@@ -288,7 +302,7 @@ while c<150 and not f:
                     mask=masks[0]
                     
                     #get_ipython().run_line_magic('matplotlib', 'inline')
-                    
+                    ax[2].clear()
                     ax[2].imshow(image)
                     show_mask(mask, ax[2])
                     intersection = (mask & label).sum()
@@ -305,30 +319,41 @@ while c<150 and not f:
                         maxx=0
                     else:
                         maxx=max(score)
+                                        
+                    score.append(s)
+                    gp.append(np.multiply(green,1))
                     
+                    rp.append(np.multiply(red,1))
+                    ng.append(len(greenx))
+                    nr.append(len(redx))
+                    stdx.append(statistics.pstdev(np.concatenate((greenx,redx))))
+                    stdy.append(statistics.pstdev(np.concatenate((greeny,redy))))
+                    print("up count",count)
                     if maxx>=s:
                         print("\nheere\n")
                         if count>=5:
-                            msg="\nNo better score is achieved in the last 5 attempts and you may stop.\nThe best score ("+str(round(max(score),2))+") is saved"
+                            print("lesssss")
+                            #msg="\nNo better score is achieved in the last 5 attempts. Start round 2 from scra\nThe best score ("+str(round(max(score),2))+") is saved"
+                            lessfive+=1
                         else:
                             print("less")
                             count+=1
                     elif  maxx<s:
                         print("more")
                         count=1
+                    if lessfive==1:
+                        print("Heeeeeeereless")
+                        msg=" (round 2) "
                     plt.title(f"Score: {(intersection / union):.3f}"+msg, fontsize=13)
                     ## saving masks, scores, points and other stats: 
                     msk.append(np.multiply(mask,5))
-                    
-                    score.append(s)
-                    gp.append(np.multiply(green,1))
-
-                    rp.append(np.multiply(red,1))
-                    ng.append(len(greenx))
-                    nr.append(len(redx))
-                    stdx.append(statistics.pstdev(np.concatenate((greenx,redx))))
-                    stdy.append(statistics.pstdev(np.concatenate((greeny,redy))))
+                    print("lessfive",lessfive)
                     print("scores:",score)
+                    if lessfive==1:
+                        lessfive+=1
+                        pyautogui.press(' ')
+                    elif lessfive==3:
+                        plt.close()
         # Create a function to toggle between green and red dots
         def toggle_color(event):
             global green
@@ -338,7 +363,7 @@ while c<150 and not f:
             global greeny
             global redy
             global current_color
-            
+            global count
             if event.key == 'g':
                 current_color = 'green'
                 print("Switched to GREEN dot mode.")
@@ -358,7 +383,12 @@ while c<150 and not f:
                 greeny=[]
                 redy=[]
                 plt.draw()
-               
+                ax[2].clear()
+                ax[2].imshow(image)
+                show_mask(mask, ax[2])
+                count=1
+                print("below count",count)
+                plt.title("No better score is achieved in the last 5 attempts. Start round 2 from scratch")
     # Create a figure and display the image
     
     
@@ -452,4 +482,3 @@ while c<150 and not f:
         file.close()
     print("Sample:",c)
 wb.save(os.path.join(name,name+'.xlsx')  )  
-
