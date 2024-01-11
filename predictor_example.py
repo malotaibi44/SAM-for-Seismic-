@@ -54,10 +54,10 @@ def closetn(node, nodes):
 sys.path.append("..")
 
 
-sam_checkpoint = 'E:/SAM-for-Seismic--main/SAM-for-Seismic--main/sam_vit_h_4b8939.pth'
+sam_checkpoint = 'sam_vit_h_4b8939.pth'
 model_type = "vit_h"
 
-device = "cuda"
+device = "cuda" if torch.cuda.is_available() else 'cpu'
 
 sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 sam.to(device=device)
@@ -166,7 +166,13 @@ while c<150 and not f:
     redy = []
     # label=plt.imread('C:/Users/Mohammed/Downloads/labels/'+labels[c])
     label=label==5
-    matplotlib.use('TkAgg')
+
+    #matplotlib.use('TkAgg')
+    try:
+        
+        matplotlib.use('Qt5Agg')
+    except:
+        matplotlib.use('TkAgg')
 
     while inc!="y":
         s=0 # this is for the score 
@@ -351,7 +357,23 @@ while c<150 and not f:
                     print("scores:",score)
                     if lessfive==1:
                         lessfive+=1
-                        pyautogui.press(' ')
+                        for line in ax[0].lines:
+                            line.set_data([], [])
+                        for line in ax[1].lines:
+                            line.set_data([], [])
+                        green = []
+                        red = []
+                        greenx = []
+                        redx = []
+                        greeny = []
+                        redy = []
+                        plt.draw()
+                        ax[2].clear()
+                        ax[2].imshow(image)
+                        show_mask(mask, ax[2])
+                        count = 1
+                        print("below count", count)
+                        plt.title("No better score is achieved in the last 5 attempts. Start round 2 from scratch")
                     elif lessfive==3:
                         plt.close()
         # Create a function to toggle between green and red dots
