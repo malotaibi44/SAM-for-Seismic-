@@ -5,7 +5,6 @@ Created on Wed Jan 10 01:47:37 2024
 @author: Mohammed
 """
 
-import pyautogui
 import sys
 from time import sleep
 using_colab = False
