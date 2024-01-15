@@ -375,6 +375,7 @@ while c<150 and not f:
                         print("below count", count)
                         plt.title("No better score is achieved in the last 5 attempts. Start round 2 from scratch")
                     elif lessfive==3:
+                        print("The window closed because you did not achieve a better score after 5 consecutive clicks in the 2nd round")
                         plt.close()
         # Create a function to toggle between green and red dots
         def toggle_color(event):
