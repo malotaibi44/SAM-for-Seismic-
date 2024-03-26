@@ -498,8 +498,9 @@ while c < 150 and not f:
     if not contin == 'y':
         wb.save(os.path.join(name, name + '.xlsx'))
         f = True
-        file = open(os.path.join(name, "time.txt"), 'w')
-        file.write(str(float(tim) + (time.time() - t)))
-        file.close()
+
     print("Sample:", c)
 wb.save(os.path.join(name, name + '.xlsx'))
+file = open(os.path.join(name, "time.txt"), 'w')
+file.write(str(float(tim) + (time.time() - t)))
+file.close()
